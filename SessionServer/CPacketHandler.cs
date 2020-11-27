@@ -9,11 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SessionServer {
-    public class MyEchoHandler : ConnectionHandler {
+    public class CPacketHandler : ConnectionHandler {
 
-        private readonly ILogger<MyEchoHandler> logger;
+        private readonly ILogger<CPacketHandler> logger;
 
-        public MyEchoHandler(ILogger<MyEchoHandler> logger) {
+        public CPacketHandler(ILogger<CPacketHandler> logger) {
             this.logger = logger;
         }
 
@@ -32,21 +32,6 @@ namespace SessionServer {
                 Console.WriteLine(Encoding.UTF8.GetString(buf,0, len));
                 await outputStream.WriteAsync(buf, 0, len);
             }
-            //while (true) {
-            //    ReadResult r = await connection.Transport.Input.ReadAsync();
-
-            //    ReadOnlySequence<byte> buf = r.Buffer;
-                
-            //    foreach (ReadOnlyMemory<byte> s in buf) {
-            //        await connection.Transport.Output.WriteAsync(s);                 
-            //    }
-
-            //    if (r.IsCompleted) {
-            //        break;
-            //    }
-
-            //    connection.Transport.Input.AdvanceTo(buf.End);
-            //}
 
             logger.LogInformation(connection.ConnectionId + " disconnected");
         }

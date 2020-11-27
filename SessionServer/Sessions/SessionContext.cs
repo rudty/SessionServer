@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Threading.Tasks;
 
 namespace SessionServer.Sessions {
@@ -11,7 +12,7 @@ namespace SessionServer.Sessions {
     /// <summary>
     /// 소켓 접속 1 개당 세션 1 개
     /// </summary>
-    public class SessionContext {
+    public class SessionContext:  IAsyncDisposable {
         private readonly Stream inputStream;
         private readonly Stream outputStream;
 
@@ -29,6 +30,15 @@ namespace SessionServer.Sessions {
                     
                 }
             }
+        }
+
+        public async ValueTask DisposeAsync() {
+            try {
+                await inputStream.DisposeAsync();
+            } catch { }
+            try {
+                await outputStream.DisposeAsync();
+            } catch { }
         }
     }
 }

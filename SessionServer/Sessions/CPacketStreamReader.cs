@@ -6,8 +6,7 @@ using System.Threading;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.IO;
-using SocketServer.Core;
-namespace SocketServer.Net.IO {
+namespace SessionServer.Sessions {
 
     /// <summary>
     /// TCP 로부터 패킷한번에 정상적으로 들어오지 않고 

@@ -2,9 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text;
-using SocketServer.Core;
 
-namespace SocketServer.Net.IO {
+namespace SessionServer.Sessions {
     /// <summary>
     /// 이 클래스는 CPacket 에서 Decode 에 관련한 함수를 관리합니다.
     /// </summary>

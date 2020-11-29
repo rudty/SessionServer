@@ -1,9 +1,8 @@
-﻿using SocketServer.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SocketServer.Net {
+namespace SessionServer.Sessions {
     class PacketDecodeFailException: Exception {
         public byte[] Buffer;
 

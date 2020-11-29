@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using SocketServer.Core;
 using Google.Protobuf;
 
-namespace SocketServer.Net.IO {
+namespace SessionServer.Sessions {
 
     /// <summary>
     /// 이 클래스는 CPacket 에서 Encode 에 관련한 함수를 관리합니다.

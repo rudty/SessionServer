@@ -36,7 +36,7 @@ namespace SessionServer {
                                                 new MinDataRate(bytesPerSecond: 100,
                                                     gracePeriod: TimeSpan.FromSeconds(10));
                                             serverOptions.Listen(IPAddress.Loopback, 8080, builder => {
-                                                builder.UseConnectionHandler<CPacketHandler>();
+                                                builder.UseConnectionHandler<CPacketConnectionHandler>();
                                             });
                                             serverOptions.ListenLocalhost(5000);
                                             serverOptions.Limits.KeepAliveTimeout =

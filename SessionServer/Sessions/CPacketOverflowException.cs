@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SocketServer.Net.IO {
+namespace SessionServer.Sessions {
     public class CPacketOverflowException : OverflowException {
         public CPacketOverflowException(string message) : base(message) {
         }

@@ -1,8 +1,7 @@
-﻿using SocketServer.Core;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace SocketServer.Net.IO {
+namespace SessionServer.Sessions {
     public static class StreamCPacketReadWriteExtension {
         /// <summary>
         /// Stream 으로부터 length 만큼 읽어 packet 에 저장합니다

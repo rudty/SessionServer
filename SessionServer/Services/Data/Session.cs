@@ -4,19 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SessionServer.Services.Data {
     public class Session {
-        public HttpContext Context{ get; init; }
+        [JsonIgnore]
+        readonly HttpContext context;
 
+        [JsonIgnore]
         readonly WebSocket webSocket;
 
         public string Id { get; private set; }
 
+        public DateTime LoginTime { get; private set;} = DateTime.Now;
+
         public Session(HttpContext context, WebSocket sock) {
-            this.Context = context;
+            this.context = context;
             this.webSocket = sock;
             this.Id = context.TraceIdentifier;
         }

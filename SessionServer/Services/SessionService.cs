@@ -22,13 +22,19 @@ namespace SessionServer.Services {
             throw new Exception($"{s.Id} exists");
         }
 
-        public Session Unregister(HttpContext ctx) {
-            string id = ctx.Connection.Id;
-            if (sessions.TryRemove(id, out Session session)) {
-                return session;
-            }
-            throw new Exception($"{id} not exists");
+        public bool Unregister(Session s) {
+            return Unregister(s.Id);
         }
+
+        public bool Unregister(string sessionId) {
+            if (sessions.TryRemove(sessionId, out Session _)) {
+                return true;
+            }
+            return false;
+        }
+
+        public bool Exists(Session s) => Exists(s.Id);
+        public bool Exists(string id) => Get(id) != null;
 
         public Session Get(string id) {
             if (sessions.TryGetValue(id, out Session session)) {

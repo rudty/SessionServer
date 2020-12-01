@@ -36,7 +36,9 @@ namespace SessionServer.Controllers {
             Session session = sessionService.Register(context, webSocket);
 
             await session.SendText("serverhello");
-            await receiveMessage(webSocket);
+            await receiveMessage(session, webSocket);
+
+            sessionService.Unregister(session);
         }
 
         private static CancellationToken newTimeoutToken() {
@@ -51,17 +53,24 @@ namespace SessionServer.Controllers {
         /// </summary>
         /// <param name="webSocket">입력 소켓</param>
         /// <returns></returns>
-        private async Task receiveMessage(WebSocket webSocket) {
+        private async Task receiveMessage(Session session, WebSocket webSocket) {
             byte [] mem = new byte[1024];
-            while (true) {
-                ArraySegment<byte> buffer = new ArraySegment<byte>(mem);
-                CancellationToken timeoutToken = newTimeoutToken();
-                WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(buffer, timeoutToken);
-                Console.WriteLine(Encoding.UTF8.GetString(mem, 0, receiveResult.Count));
+            try {
+                while (true) {
+                    if (false == sessionService.Exists(session)) {
+                        break;
+                    }
+                    ArraySegment<byte> buffer = new ArraySegment<byte>(mem);
+                    CancellationToken timeoutToken = newTimeoutToken();
+                    WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(buffer, timeoutToken);
+                    Console.WriteLine(Encoding.UTF8.GetString(mem, 0, receiveResult.Count));
 
-                if (receiveResult.CloseStatus != null) {
-                    break;
+                    if (receiveResult.CloseStatus != null) {
+                        break;
+                    }
                 }
+            } catch (Exception e) {
+                Console.WriteLine(e);
             }
         }
     }

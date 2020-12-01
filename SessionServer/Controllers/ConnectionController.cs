@@ -20,8 +20,12 @@ namespace SessionServer.Controllers {
 
         [HttpGet("kick/{sessionId}")]
         public KickResponse Kick(string sessionId) {
-            bool ok = sessionService.Unregister(sessionId);
-            return new KickResponse(ok);
+            Session session = sessionService.Get(sessionId);
+            if (session != null) {
+                session.SessionStatus = SessionStatus.Closed;
+                return new KickResponse(true);
+            }
+            return new KickResponse(false);
         }
     }
 }

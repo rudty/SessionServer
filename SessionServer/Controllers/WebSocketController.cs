@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SessionServer.Services;
 using SessionServer.Services.Data;
 using System;
@@ -17,9 +18,11 @@ namespace SessionServer.Controllers {
 
         private const int receiveTimeoutMills = 600 * 1000; // 10분
         private readonly SessionService sessionService;
+        private readonly ILogger<WebSocketController> logger;
 
-        public WebSocketController(SessionService svc) {
+        public WebSocketController(ILogger<WebSocketController> logger, SessionService svc) {
             this.sessionService = svc;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -34,9 +37,10 @@ namespace SessionServer.Controllers {
             
             WebSocket webSocket = await websocketManager.AcceptWebSocketAsync();
             Session session = sessionService.Register(context, webSocket);
-
             await session.SendText("serverhello");
-            await receiveMessage(session, webSocket);
+            session.SessionStatus = SessionStatus.Ready;
+
+            await receiveMessage(session);
 
             sessionService.Unregister(session);
         }
@@ -53,24 +57,11 @@ namespace SessionServer.Controllers {
         /// </summary>
         /// <param name="webSocket">입력 소켓</param>
         /// <returns></returns>
-        private async Task receiveMessage(Session session, WebSocket webSocket) {
-            byte [] mem = new byte[1024];
+        private async Task receiveMessage(Session session) {
             try {
-                while (true) {
-                    if (false == sessionService.Exists(session)) {
-                        break;
-                    }
-                    ArraySegment<byte> buffer = new ArraySegment<byte>(mem);
-                    CancellationToken timeoutToken = newTimeoutToken();
-                    WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(buffer, timeoutToken);
-                    Console.WriteLine(Encoding.UTF8.GetString(mem, 0, receiveResult.Count));
-
-                    if (receiveResult.CloseStatus != null) {
-                        break;
-                    }
-                }
+            await session.Run();
             } catch (Exception e) {
-                Console.WriteLine(e);
+                logger.LogInformation(e.ToString());
             }
         }
     }

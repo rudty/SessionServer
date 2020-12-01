@@ -22,9 +22,7 @@ namespace SessionServer.Services {
             throw new Exception($"{s.Id} exists");
         }
 
-        public bool Unregister(Session s) {
-            return Unregister(s.Id);
-        }
+        public bool Unregister(Session s) => Unregister(s.Id);
 
         public bool Unregister(string sessionId) {
             if (sessions.TryRemove(sessionId, out Session _)) {

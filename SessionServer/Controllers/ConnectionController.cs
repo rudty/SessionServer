@@ -22,7 +22,7 @@ namespace SessionServer.Controllers {
         public KickResponse Kick(string sessionId) {
             Session session = sessionService.Get(sessionId);
             if (session != null) {
-                session.SessionStatus = SessionStatus.Closed;
+                session.Close();
                 return new KickResponse(true);
             }
             return new KickResponse(false);

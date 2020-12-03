@@ -35,34 +35,12 @@ namespace SessionServer.Controllers {
                 return;
             }
             
-            WebSocket webSocket = await websocketManager.AcceptWebSocketAsync();
-            Session session = sessionService.Register(context, webSocket);
-            await session.SendText("serverhello");
-            session.SessionStatus = SessionStatus.Ready;
+            using WebSocket webSocket = await websocketManager.AcceptWebSocketAsync();
+            await using Session session = sessionService.Register(context, webSocket);
 
-            await receiveMessage(session);
+            await session.Run();
 
             sessionService.Unregister(session);
-        }
-
-        private static CancellationToken newTimeoutToken() {
-            var source = new CancellationTokenSource();
-            source.CancelAfter(receiveTimeoutMills);
-            return source.Token;
-        }
-
-
-        /// <summary>
-        /// 현재는 뭔가 받아도 할게 딱히 없지만 이후 추가되면 서비스 하나 더만들어서 사용할 것
-        /// </summary>
-        /// <param name="webSocket">입력 소켓</param>
-        /// <returns></returns>
-        private async Task receiveMessage(Session session) {
-            try {
-            await session.Run();
-            } catch (Exception e) {
-                logger.LogInformation(e.ToString());
-            }
         }
     }
 }

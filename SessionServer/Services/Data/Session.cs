@@ -58,17 +58,23 @@ namespace SessionServer.Services.Data {
                 ArraySegment<byte> buffer = new ArraySegment<byte>(mem);
                 CancellationToken timeoutToken = newTimeoutToken();
                 WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(buffer, timeoutToken);
-                Console.WriteLine(Encoding.UTF8.GetString(mem, 0, receiveResult.Count));
+
+                if (receiveResult.Count > 0) {
+                    Console.WriteLine(Encoding.UTF8.GetString(mem, 0, receiveResult.Count));
+                }
 
                 LastReceiveTime = DateTime.Now;
 
                 if (receiveResult.CloseStatus != null) {
+                    Console.WriteLine($"close: {receiveResult.CloseStatus} {receiveResult.CloseStatusDescription}");
                     break;
                 }
                 if (SessionStatus != SessionStatus.Ready) {
                     break;
                 }
             }
+
+            SessionStatus = SessionStatus.Closed;
         }
 
         /// <summary>

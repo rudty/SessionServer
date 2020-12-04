@@ -16,7 +16,6 @@ namespace SessionServer.Controllers {
     [Route("api/[controller]")]
     public class WebSocketController : Controller {
 
-        private const int receiveTimeoutMills = 600 * 1000; // 10분
         private readonly SessionService sessionService;
         private readonly ILogger<WebSocketController> logger;
 
@@ -37,9 +36,11 @@ namespace SessionServer.Controllers {
             
             using WebSocket webSocket = await websocketManager.AcceptWebSocketAsync();
             await using Session session = sessionService.Register(context, webSocket);
+            logger.LogInformation($"connect session {session.Id}");
 
             await session.Run();
 
+            logger.LogInformation($"disconnect session {session.Id}");
             sessionService.Unregister(session);
         }
     }

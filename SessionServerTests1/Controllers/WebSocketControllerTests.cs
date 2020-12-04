@@ -27,5 +27,14 @@ namespace SessionServer.Controllers.Tests {
             string s = await testWebSocket.ReceiveString();
             Assert.AreEqual(s, "serverhello");
         }
+
+        [TestMethod()]
+        public async Task CloseTest() {
+            using var testWebSocket = new TestWebSocket() {
+                Path = "api/WebSocket",
+            };
+            await testWebSocket.Connect<Startup>();
+            await testWebSocket.Socket.CloseAsync(WebSocketCloseStatus.Empty, "testclose", CancellationToken.None);
+        }
     }
 }

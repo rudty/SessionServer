@@ -16,12 +16,18 @@ namespace SessionServer.Controllers {
     [Route("api/[controller]")]
     public class WebSocketController : Controller {
 
+        private readonly SocketMessageService socketMessageService;
         private readonly SessionService sessionService;
         private readonly ILogger<WebSocketController> logger;
 
-        public WebSocketController(ILogger<WebSocketController> logger, SessionService svc) {
-            this.sessionService = svc;
+        public WebSocketController(
+                ILogger<WebSocketController> logger, 
+                SessionService sessionService,
+                SocketMessageService socketMessageService) {
+
+            this.sessionService = sessionService;
             this.logger = logger;
+            this.socketMessageService = socketMessageService;
         }
 
         [HttpGet]
@@ -35,10 +41,11 @@ namespace SessionServer.Controllers {
             }
             
             using WebSocket webSocket = await websocketManager.AcceptWebSocketAsync();
-            await using Session session = sessionService.Register(context, webSocket);
+            Session session = new Session(context, webSocket);
+            sessionService.Register(session);
             logger.LogInformation($"connect session {session.Id}");
 
-            await session.Run();
+            await socketMessageService.HandleMessage(session, webSocket);
 
             logger.LogInformation($"disconnect session {session.Id}");
             sessionService.Unregister(session);

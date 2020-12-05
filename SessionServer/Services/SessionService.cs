@@ -14,12 +14,10 @@ namespace SessionServer.Services {
     public class SessionService {
         ConcurrentDictionary<string, Session> sessions = new ConcurrentDictionary<string, Session>();
 
-        public Session Register(HttpContext ctx, WebSocket socket) {
-            Session s = new Session(ctx, socket);
-            if (sessions.TryAdd(s.Id, s)) {
-                return s;
+        public void Register(Session s) {
+            if (false == sessions.TryAdd(s.Id, s)) {
+                throw new Exception($"{s.Id} exists");
             }
-            throw new Exception($"{s.Id} exists");
         }
 
         public bool Unregister(Session s) => Unregister(s.Id);

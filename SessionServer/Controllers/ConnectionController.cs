@@ -2,6 +2,8 @@
 using SessionServer.Services;
 using SessionServer.Services.Data;
 using SessionServer.Controllers.Transfer;
+using Microsoft.AspNetCore.Http;
+
 namespace SessionServer.Controllers {
     [Route("api/[controller]")]
     public class ConnectionController : Controller {
@@ -18,8 +20,11 @@ namespace SessionServer.Controllers {
             return new InformationResponse(session);
         }
 
-        [HttpGet("kick/{sessionId}")]
-        public KickResponse Kick(string sessionId) {
+        [HttpPost("kick/{sessionId}")]
+        public KickResponse Kick(string sessionId, string reason) {
+            //string reason = context.Request.Query["reason"];
+            System.Console.WriteLine(reason);
+            System.Console.WriteLine(sessionId);
             Session session = sessionService.Get(sessionId);
             if (session != null) {
                 session.Close();

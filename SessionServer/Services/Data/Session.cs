@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace SessionServer.Services.Data {
-    public class Session: IAsyncDisposable {
-        private const int receiveTimeoutMills = 600 * 1000; // 10분
-
-        readonly HttpContext context;
+    public class Session {
 
         readonly WebSocket webSocket;
 
@@ -21,12 +19,16 @@ namespace SessionServer.Services.Data {
 
         public DateTime LoginTime { get; private set;} = DateTime.Now;
 
-        public DateTime LastReceiveTime { get; private set; }
+        public DateTime LastReceiveTime { get; internal set; }
         
-        public SessionStatus SessionStatus { get; private set; } = SessionStatus.Connect;
+        public SessionStatus SessionStatus { get; internal set; } = SessionStatus.Connect;
+
+        /// <summary>
+        /// 서버에서 종료시키거나 클라이언트가 종료 요청 보냈을때 저장
+        /// </summary>
+        public string LastCloseDescription { get; internal set; } = "";
 
         public Session(HttpContext context, WebSocket sock) {
-            this.context = context;
             this.webSocket = sock;
             this.Id = context.TraceIdentifier;
         }
@@ -34,47 +36,6 @@ namespace SessionServer.Services.Data {
         public Task SendText(string txt) {
             var m = Encoding.UTF8.GetBytes(txt);
             return webSocket.SendAsync(m, WebSocketMessageType.Text, true, CancellationToken.None);
-        }
-
-        private static CancellationToken newTimeoutToken() {
-            var source = new CancellationTokenSource();
-            source.CancelAfter(receiveTimeoutMills);
-            return source.Token;
-        }
-
-        /// <summary>
-        /// 클라이언트에서 뭔가를 받는 함수
-        /// 실제로 처리하는건 아무것도 없고
-        /// 마지막으로 응답 받은 시간만 갱신함
-        /// </summary>
-        /// <returns></returns>
-        public async Task Run() {
-            await SendText("serverhello");
-
-            SessionStatus = SessionStatus.Ready;
-
-            byte[] mem = new byte[1024];
-            while (true) {
-                ArraySegment<byte> buffer = new ArraySegment<byte>(mem);
-                CancellationToken timeoutToken = newTimeoutToken();
-                WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(buffer, timeoutToken);
-
-                if (receiveResult.Count > 0) {
-                    Console.WriteLine(Encoding.UTF8.GetString(mem, 0, receiveResult.Count));
-                }
-
-                LastReceiveTime = DateTime.Now;
-
-                if (receiveResult.CloseStatus != null) {
-                    Console.WriteLine($"close: {receiveResult.CloseStatus} {receiveResult.CloseStatusDescription}");
-                    break;
-                }
-                if (SessionStatus != SessionStatus.Ready) {
-                    break;
-                }
-            }
-
-            SessionStatus = SessionStatus.Closed;
         }
 
         /// <summary>
@@ -86,12 +47,6 @@ namespace SessionServer.Services.Data {
         /// </summary>
         public void Close() {
             SessionStatus = SessionStatus.Closed;
-        }
-
-        public async ValueTask DisposeAsync() {
-            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, newTimeoutToken());
-            webSocket.Dispose();
-            return;
         }
     }
 }

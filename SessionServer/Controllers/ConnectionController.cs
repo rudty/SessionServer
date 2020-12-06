@@ -22,11 +22,9 @@ namespace SessionServer.Controllers {
 
         [HttpPost("kick/{sessionId}")]
         public KickResponse Kick(string sessionId, string reason) {
-            //string reason = context.Request.Query["reason"];
-            System.Console.WriteLine(reason);
-            System.Console.WriteLine(sessionId);
             Session session = sessionService.Get(sessionId);
             if (session != null) {
+                session.LastCloseDescription = reason;
                 session.Close();
                 return new KickResponse(true);
             }
